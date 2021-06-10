@@ -73,7 +73,7 @@
 										{
 											"key": "images",
 											"type": "file",
-											"src": "/Users/dancoope/Documents/server-sharing/postman/server-sharing.postman_collection.json"
+											"src": "./server-sharing.postman_collection.json"
 										},
 										{
 											"key": "tags",
@@ -278,7 +278,7 @@
 								{
 									"key": "images",
 									"type": "file",
-									"src": "/Users/dancoope/Documents/server-sharing/postman/test_image.jpg"
+									"src": "./test_image.jpg"
 								},
 								{
 									"key": "tags",
@@ -353,7 +353,7 @@
 								{
 									"key": "images",
 									"type": "file",
-									"src": "/Users/dancoope/Documents/server-sharing/postman/test_image.jpg"
+									"src": "./test_image.jpg"
 								},
 								{
 									"key": "tags",
