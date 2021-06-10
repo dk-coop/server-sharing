@@ -1,0 +1,32 @@
+{
+  "name": "server-sharing",
+  "version": "1.0.0",
+  "description": "Image sharing service",
+  "main": "server.js",
+  "scripts": {
+    "build-client": "cd client && npm install && npm run build",
+    "test": "newman run postman/server-sharing.postman_collection.json -e postman/server-sharing-env.postman_environment.json -r cli --verbose",
+    "lint": "npx eslint ./*.js ./src/*.js ./src/**/*.js ./src/**/**/*.js ./src/**/**/**/*.js --quiet",
+    "lint:fix": "npm run lint -- --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "assert": "^2.0.0",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-validator": "^6.11.1",
+    "mongodb": "^3.6.9",
+    "mongoose": "^5.12.13",
+    "multer": "^1.4.2",
+    "validator": "^13.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.28.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-react": "^7.24.0",
+    "newman": "^5.2.3"
+  }
+}

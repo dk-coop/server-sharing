@@ -1,0 +1,674 @@
+{
+	"info": {
+		"_postman_id": "8b16a57f-6af7-4312-85f6-78bc062a2b56",
+		"name": "server-sharing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "health",
+			"item": [
+				{
+					"name": "health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/health",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "images",
+			"item": [
+				{
+					"name": "Error cases",
+					"item": [
+						{
+							"name": "/images non-image",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Unsupported image - Status code is 500 for now until it's updated to 400\", function () {",
+											"    pm.response.to.have.status(500);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "images",
+											"type": "file",
+											"src": "/Users/dancoope/Documents/server-sharing/postman/server-sharing.postman_collection.json"
+										},
+										{
+											"key": "tags",
+											"value": "dog, hat",
+											"contentType": "application/json",
+											"type": "text"
+										},
+										{
+											"key": "name",
+											"value": "conan",
+											"contentType": "application/json",
+											"type": "text"
+										},
+										{
+											"key": "description",
+											"value": "what a nice hat that is",
+											"contentType": "application/json",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{host}}/images",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"images"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/images/delete does not exist",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {",
+											"    // in the future this should be 404 not found",
+											"    pm.response.to.have.status(400);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}/images/delete?imageId=2222222222",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"images",
+										"delete"
+									],
+									"query": [
+										{
+											"key": "imageId",
+											"value": "2222222222"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/images/tags/tagId does not exist",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    // even if the tag does not exist we'll send back an empty array",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"No images were returned\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    var imagesList = jsonData.length;",
+											"    pm.expect(imagesList).length.to.equal(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}/images?tagId=thisshouldnotexist",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"images"
+									],
+									"query": [
+										{
+											"key": "tagId",
+											"value": "thisshouldnotexist"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "/images/imageId does not exist",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{host}}/images?imageId=111111111111111111",
+									"protocol": "http",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"images"
+									],
+									"query": [
+										{
+											"key": "imageId",
+											"value": "111111111111111111"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "/images",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"var imagesList = jsonData.length;",
+									"var image = jsonData[0];",
+									"pm.test(\"response includes name, description, tags, location\", function () {",
+									"    pm.expect(imagesList).length.to.equal(1);",
+									"    ",
+									"    pm.expect(image.name).to.equal('conan');",
+									"    pm.expect(image.description).to.equal('what a nice hat that is');",
+									"    pm.expect(image.location).to.exist;",
+									"    _.each(image.tags, (tag) => {",
+									"        pm.expect(tag).to.exist;",
+									"    })",
+									"});",
+									"// set env var for the location and then run /images/assets/assetId ",
+									"// to check that the static asset returns 200",
+									"pm.environment.set(\"imageLocation\", image.location);",
+									"pm.environment.set(\"imageId\", image._id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/Users/dancoope/Documents/server-sharing/postman/test_image.jpg"
+								},
+								{
+									"key": "tags",
+									"value": "dog, hat",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "conan",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "what a nice hat that is",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}/images",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/assets/assetId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content type is an image\", function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.eql('image/jpeg');",
+									"});",
+									"",
+									"",
+									"// unset the imageLocation env var for the next test",
+									"pm.environment.unset(\"imageLocation\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": "/Users/dancoope/Documents/server-sharing/postman/test_image.jpg"
+								},
+								{
+									"key": "tags",
+									"value": "dog, hat",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "conan",
+									"contentType": "application/json",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "what a nice hat that is",
+									"contentType": "application/json",
+									"type": "text"
+								}
+							],
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}/{{imageLocation}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"{{imageLocation}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/images",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response includes name, description, tags, location\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var imagesList = jsonData.length;",
+									"    for (var i = 0; i < imagesList; i++) {",
+									"        var image = jsonData[i];",
+									"        pm.expect(image.name).to.exist;",
+									"        pm.expect(image.description).to.exist;",
+									"        pm.expect(image.location).to.exist;",
+									"        _.each(image.tags, (tag) => {",
+									"            pm.expect(tag).to.exist;",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/images",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/images/imageId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"One response that includes name, description, tags, location\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var imagesList = jsonData.length;",
+									"    pm.expect(imagesList).length.to.equal(1);",
+									"",
+									"    var image = jsonData[0];",
+									"    pm.expect(image.name).to.equal('conan');",
+									"    pm.expect(image.description).to.equal('what a nice hat that is');",
+									"    pm.expect(image.location).to.exist;",
+									"    _.each(image.tags, (tag) => {",
+									"        pm.expect(tag).to.exist;",
+									"    });",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/images?imageId={{imageId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images"
+							],
+							"query": [
+								{
+									"key": "imageId",
+									"value": "{{imageId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/images/tags/tagId",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response includes name, description, tags, location\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var imagesList = jsonData.length;",
+									"    for (var i = 0; i < imagesList; i++) {",
+									"        var image = jsonData[i];",
+									"        pm.expect(image.name).to.exist;",
+									"        pm.expect(image.description).to.exist;",
+									"        pm.expect(image.location).to.exist;",
+									"        _.each(image.tags, (tag) => {",
+									"            pm.expect(tag).to.exist;",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/images?tagId=dog",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images"
+							],
+							"query": [
+								{
+									"key": "tagId",
+									"value": "dog"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/images/keyword/keyword",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"response includes name, description, tags, location\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    var imagesList = jsonData.length;",
+									"    for (var i = 0; i < imagesList; i++) {",
+									"        var image = jsonData[imagesList];",
+									"        pm.expect(image.name).to.exist;",
+									"        pm.expect(image.description).to.exist;",
+									"        pm.expect(image.location).to.exist;",
+									"        _.each(image.tags, (tag) => {",
+									"            pm.expect(tag).to.exist;",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/images?keyword=dog",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images"
+							],
+							"query": [
+								{
+									"key": "keyword",
+									"value": "dog"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/images/delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Unset imageId for the next test",
+									"pm.environment.unset(\"imageId\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/images/delete?imageId={{imageId}}",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"images",
+								"delete"
+							],
+							"query": [
+								{
+									"key": "imageId",
+									"value": "{{imageId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tags",
+			"item": [
+				{
+					"name": "/tags",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://{{host}}/tags",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"tags"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
