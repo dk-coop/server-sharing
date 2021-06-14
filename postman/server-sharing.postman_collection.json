@@ -73,7 +73,7 @@
 										{
 											"key": "images",
 											"type": "file",
-											"src": "./server-sharing.postman_collection.json"
+											"src": "./postman/server-sharing.postman_collection.json"
 										},
 										{
 											"key": "tags",

@@ -88,3 +88,4 @@ Aside from one of the obvious that the front-end is horribly designed and needs 
 - The React components should really be their own file and the Javscript CSS should be in its own file as well
 - There is dupicated code in the ImageAPIs.js file connecting to the db that could be its own function and called
 - Fix image upload in the UI
+- The database in this repo constantly changing with everytime the app launches is not sustainable. That needs to be updated.
