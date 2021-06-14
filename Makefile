@@ -4,21 +4,29 @@ IMAGE_TAG=$(SERVICE_NAME)-img
 
 default: build run
 
-build:
-	docker build -t $(IMAGE_TAG) .
+build-app:
+	npm run build
+
+build: build-app
+	docker build --no-cache -t $(IMAGE_TAG) .
 
 volume:
  	docker volume create \
-    	--opt device=:/usr/src \
+    	--opt device=:/usr/src/app \
 		assets
 run: volume
-	docker-compose up
+	docker-compose \
+		-f docker-compose.yaml \
+		up web mongodb
 
 run-web: volume
-	docker-compose up \
-		--build -d web
+	docker-compose \
+		-f docker-compose.yaml \
+		up --build -d web
 
 test:
 	npm run test
 
-
+clean:
+	docker stop $(SERVICE_NAME) || echo ""
+	docker system prune -f || echo ""

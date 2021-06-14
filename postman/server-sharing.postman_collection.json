@@ -278,7 +278,7 @@
 								{
 									"key": "images",
 									"type": "file",
-									"src": "./test_image.jpg"
+									"src": "./postman/test_image.jpg"
 								},
 								{
 									"key": "tags",
@@ -353,7 +353,7 @@
 								{
 									"key": "images",
 									"type": "file",
-									"src": "./test_image.jpg"
+									"src": "./postman/test_image.jpg"
 								},
 								{
 									"key": "tags",

@@ -1,5 +1,5 @@
 import React from 'react';
-import styled, { css } from 'styled-components'
+import styled from 'styled-components'
 import { getImages,
     getImagesByTag,
     getImagesByKeyword,
@@ -17,12 +17,8 @@ class ImageGrid extends React.Component {
           images: Array(),
           selectedImage: null,
           tags: null,
+          add: {},
         };
-
-        this.fileInput = React.createRef();
-        this.nameInput = React.createRef();
-        this.descriptionInput = React.createRef();
-        this.tagsInput = React.createRef();
     }
 
     async componentDidMount() {
@@ -39,7 +35,7 @@ class ImageGrid extends React.Component {
         } else if (this.state.images.length > 0) {
             return this.renderImagesInGrid()
         } else {
-            return <p>no images yet</p>
+            return this.renderAddImage()
         }
     }
 
@@ -64,29 +60,26 @@ class ImageGrid extends React.Component {
     }
 
     clearSelectedImage = async() => {
+        // update images
         const updatedImages = await getImages();
         await this.setState({ images: updatedImages });
         await this.setState({ selectedImage: null });
+        // update tags
+        const updatedTags = await getTags();
+        await this.setState({ tags: updatedTags });
     }
 
     mapGridImagesToReact(images) {
-        const Button = styled.button`
-        background-color: white;
-        border-color: Azure;
-        color: darkslategray;
-        height: 350px;
-        overflow: scroll;
-        `;
         if (images) {
             return images.map(
                 image => {
                     return (
                     <ImageDetailsWrapper>
-                        <Button key={image._id} onClick={() => this.handleSelectedImage(image._id)}>
+                        <ImageGridButton key={image._id} onClick={() => this.handleSelectedImage(image._id)}>
                             <ImageWrapper src={image.location} alt={image.name} />
-                            <Metadata>{image.name}</Metadata>
-                            <Metadata>{image.description}</Metadata>
-                        </Button>
+                            <ImageMetadata>{image.name}</ImageMetadata>
+                            <ImageMetadata>{image.description}</ImageMetadata>
+                        </ImageGridButton>
                     </ImageDetailsWrapper>)
                 });
         }
@@ -94,7 +87,6 @@ class ImageGrid extends React.Component {
     }
 
     handleGridTagsChange = async(event) => {
-        console.log(event.target.defaultValue)
         const updatedImages = await getImagesByTag(event.target.defaultValue);
         await this.setState({ images: updatedImages });
     }
@@ -104,9 +96,9 @@ class ImageGrid extends React.Component {
             return tags.map(
                 tag => {
                     return (
-                    <label for={tag}>{tag}:
-                        <input type="radio" id={tag} name="gridtag" value={tag} onChange={this.handleGridTagsChange}></input>
-                    </label>
+                        <TagWrapper htmlFor={tag}>{tag}:
+                            <input type="radio" id={tag} name="gridtag" value={tag} onChange={this.handleGridTagsChange}></input>
+                        </TagWrapper>
                     )
                 });
             }
@@ -117,9 +109,10 @@ class ImageGrid extends React.Component {
         return (
             <form>
               <label>
-                Available Tags:
-                <label for="all">Show all:</label>
-                <input type="radio" id="all" name="gridtag" value="Show all images" onChange={this.clearSelectedImage}></input>
+                <h2>Available Tags:</h2>
+                <TagWrapper htmlFor="all">Show all:
+                    <input type="radio" id="all" name="gridtag" value="Show all images" onChange={this.clearSelectedImage}></input>
+                </TagWrapper>
                 {this.mapGridTagsToReact(tags)}
               </label>
             </form>
@@ -127,73 +120,78 @@ class ImageGrid extends React.Component {
     }
 
     handleAddImageSubmit = async(event) => {
-        const file = this.fileInput.current.files[0].name
-        const name = this.nameInput.current.value;
-        const description = this.descriptionInput.current.value;
-        const tags = this.tagsInput.current.value;
-
-         const response = await addImage(file, name, description, tags);
-         console.log(response)
-         await this.clearSelectedImage()
+        const newImageToAdd = this.state.add;
+        const newImage = await addImage(newImageToAdd.file, newImageToAdd.name, newImageToAdd.description, newImageToAdd.tags);
+        // in case at some point want to switch views to show image view instead of grid
         event.preventDefault();
     }
 
     renderAddImage = () => {
+        // this should be its own component with handleAddImageSubmit(event)
         return (
-            <GridWrapper>
-            <h2>Add your own image</h2>
-            <form action="#" id="#" encType="multipart/form-data" onSubmit={this.handleAddImageSubmit}>
-                <div>
-                <label for="newImage">Image to be uploaded (png, jpg, gif only):</label>
-                <input type="file" required
-                    id="newImage" name="newImage"
-                    accept="image/png, image/jpeg, image/jpg, image/gif"
-                    ref={this.fileInput}></input>
-                </div>
-                <div>
-                    <label for="name">Name (3 to 20 characters):</label>
-                    <input type="text" id="name" name="name" required
-                        minlength="3" maxlength="20" size="10" ref={this.nameInput}></input>
-                </div>
-                <div>
-                    <label for="description">Description (3 to 50 characters):</label>
-                    <input type="text" id="description" name="description"
-                        minlength="3" maxlength="50" size="30" ref={this.descriptionInput}></input>
-                </div>
-                <div>
-                    <label for="tags">Tags (comma separated):</label>
-                    <input type="text" id="tags" name="tags"
-                        minlength="3" maxlength="50" size="30" ref={this.tagsInput}></input>
-                </div>
-                <input type="submit" value="Add Image to Album"></input>
-            </form>
-            </GridWrapper>
+            <FormWrapper>
+                <h2>Add your own image</h2>
+                <form action="#" id="#" encType="multipart/form-data" onSubmit={this.handleAddImageSubmit}>
+                    <div>
+                    <label htmlFor="newImage">Image to be uploaded (png, jpg, gif only):</label>
+                    <input type="file" required
+                        id="newImage" name="newImage"
+                        accept="image/png, image/jpeg, image/jpg, image/gif"
+                        onChange={(event) => {
+                                this.setState({ add: { ...this.state.add, file: event.target.files[0] } })
+                        }}></input>
+                    </div>
+                    <div>
+                        <label htmlFor="name">Name (3 to 20 characters):</label>
+                        <input type="text" id="name" name="name" required
+                            minLength="3" maxLength="20" size="10"
+                            onChange={(event) => {
+                                this.setState({ add: { ...this.state.add, name: event.target.value } })
+                            }}></input>
+                    </div>
+                    <div>
+                        <label htmlFor="description">Description (3 to 50 characters):</label>
+                        <input type="text" id="description" name="description"
+                            minLength="3" maxLength="50" size="30"
+                            onChange={(event) => {
+                                this.setState({ add: { ...this.state.add, description: event.target.value } })
+                            }}></input>
+                    </div>
+                    <div>
+                        <label htmlFor="tags">Tags (comma separated):</label>
+                        <input type="text" id="tags" name="tags"
+                            minLength="3" maxLength="50" size="30"
+                            onChange={(event) => {
+                                this.setState({ add: { ...this.state.add, tags: event.target.value } })
+                            }}></input>
+                    </div>
+                    <input type="submit" value="Add Image to Album"></input>
+                </form>
+            </FormWrapper>
         )
     }
 
     renderImagesInGrid = () => {
+        // this should be its own component separated out as a view
+        // and pulling in the renderAddImage() component, the radioGridTags() component,
+        // and mapGridImagesToReact() component
         return (
-            <BodyWrapper>
+            <div>
                 <GridWrapper>
                     {this.radioGridTags(this.state.tags)}
                 </GridWrapper>
 
                 {this.renderAddImage()}
 
+                <h2>View images</h2>
                 <GridWrapper>
                     {this.mapGridImagesToReact(this.state.images)}
                 </GridWrapper>
-            </BodyWrapper>
+            </div>
         );
     }
 
     renderImageById = () => {
-        const ImageWrapper = styled.img`
-            display: flex;
-            height: 400px;
-            padding: 0 5px;
-            border: 5px;
-            `;
         const image = this.state.selectedImage;
         const tags = this.mapImageTagsToReact(image.tags);
         return (
@@ -202,7 +200,7 @@ class ImageGrid extends React.Component {
                     close view
                 </button>
                 <h2>Name: {image.name}</h2>
-                <ImageWrapper key={image._id} src={image.location} onClick={() => openURlPathInNewTab(image.location)}/>
+                <ImageByIdWrapper key={image._id} src={image.location} onClick={() => openURlPathInNewTab(image.location)}/>
                 <p>{image.description}</p>
                 <p>Tags:</p>
                 <ul>
@@ -216,44 +214,65 @@ class ImageGrid extends React.Component {
     }
 
     render() {
-          // if images has been set let's load them
-          const updatedReactView = this.updateView();
-          return (
-              <div>
-                  {updatedReactView}
-              </div>
-          )
+        // if images has been set let's load them
+        const updatedReactView = this.updateView();
+        return (
+            <BodyWrapper>
+                {updatedReactView}
+            </BodyWrapper>
+        )
     }
-
-
-
 }
 
+// these should be put in a styles.js sheet and shared across components when
+// these are cleaned up to be their own component and then imported.
 const BodyWrapper = styled.section`
 padding: 5px;
+color: DarkSlateGray;
+`;
+const TagWrapper = styled.label`
+display: block;
 `;
 const GridWrapper = styled.section`
 display: flex;
 flex-wrap: wrap;
-padding: 0 5px;
+padding: 0 15px;
 width: 80%;
 border: 5px;
 `;
-
-const ImageDetailsWrapper = styled.section`
-flex-wrap: 25%;
-padding: 0 5px;
-max-width: 80%;
+const FormWrapper = styled.section`
+padding: 0 15px;
+width: 80%;
+border: 5px;
+`;
+const ImageGridButton = styled.button`
+background-color: white;
+border-color: Azure;
+height: 350px;
+overflow: scroll;
 `;
 const ImageWrapper = styled.img`
 padding: 10px;
 height: 200px;
 vertical-align: middle;
+cursor: pointer;
 `;
-const Metadata = styled.p`
+const ImageMetadata = styled.p`
 width: 200px;
 font-size: 15px;
 `;
-
+const ImageDetailsWrapper = styled.section`
+flex-wrap: 25%;
+padding: 0 5px;
+max-width: 80%;
+`;
+const ImageByIdWrapper = styled.img`
+display: flex;
+height: 400px;
+padding: 0 5px;
+border: 5px;
+cursor: pointer;
+vertical-align: middle;
+`;
 
 export default ImageGrid;

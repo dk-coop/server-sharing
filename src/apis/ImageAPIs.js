@@ -2,6 +2,7 @@ const { ObjectID } = require('mongodb');
 const { MongoClient } = require('mongodb');
 const { validationResult } = require('express-validator');
 const validator = require('validator');
+const { unlink } = require("fs").promises;
 
 const { DOCKER_DB_URL, ASSETS_DB, ASSETS_DB_COLLECTION_IMAGES } = require('../constants');
 
@@ -30,6 +31,7 @@ async function getImagesHandler(req, res, next) {
             }
             if (req.query.tagId) filter.tags = req.query.tagId;
             if (req.query.keyword) {
+                // currently not working properly
                 filter.tags = { $regex: /^req.query.keyword/ };
                 filter.name = { $regex: /^req.query.keyword/ };
                 filter.description = { $regex: /^req.query.keyword/ };
@@ -37,7 +39,7 @@ async function getImagesHandler(req, res, next) {
         }
         const images = await assetsDB.collection(ASSETS_DB_COLLECTION_IMAGES)
                                     .find(filter).batchSize(batchImagesReturned).toArray();
-        client.close();
+        await client.close();
         res.send(images);
     } catch (error) {
         res.status(400).send('Error retrieving images with given parameters.');
@@ -58,13 +60,14 @@ async function deleteImagesHandler(req, res, next) {
         if (req.params.imageId) {
             // delete one image from db
             const imageObjectId = new ObjectID(req.query.imageId);
-            response = assetsDB.collection(ASSETS_DB_COLLECTION_IMAGES).deleteOne({ _id: imageObjectId });
+            response = await assetsDB.collection(ASSETS_DB_COLLECTION_IMAGES).findOneAndDelete({ _id: imageObjectId });
+            await unlink(response.value.location);
         } else {
             // delete multiple images from db (would use db.collection().deleteMany)
             // not implemented yet
             response = 'Deleting multiple images is not available at this time.';
         }
-        client.close();
+        await client.close();
         res.send(response);
     } catch (error) {
         res.status(400).send('Error deleting image. imageId does not exist.');
@@ -99,8 +102,7 @@ async function createImagesHandler(req, res, next) {
             location: req.file.path,
         };
         const results = await assetsDB.collection(ASSETS_DB_COLLECTION_IMAGES).insertOne(imagesDocument);
-        client.close();
-
+        await client.close();
         res.send(results.ops);
     } catch (error) {
         res.status(500).send('Error adding images');

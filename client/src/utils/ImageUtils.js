@@ -1,5 +1,4 @@
 import axios from 'axios';
-import fs from 'fs';
 
 const headers = {
         'Access-Control-Allow-Origin': '*',
@@ -17,7 +16,6 @@ async function getImages(filter = '') {
         console.log("Error getting images.")
         console.log(error);
     });
-    console.log(returnValue)
     return returnValue;
 }
 
@@ -48,11 +46,10 @@ async function deleteImageById(imageId) {
 
 async function addImage(file, name, description, tags) {
     const data = new FormData();
-    data.append('image.jpg', fs.createReadStream(file));
+    data.append('images', file, file.name);
     data.append('name', name);
     data.append('description', description);
     data.append('tags', tags);
-
     let returnValue = [];
     await axios.post(`/images`, data, {
         headers: headers

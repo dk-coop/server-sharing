@@ -8,6 +8,7 @@ An assets sharing service.
 
 # build and run service locally in Docker
 $ make
+# the service is now running on http://localhost:3000
 
 # other commands
 # build service
@@ -16,6 +17,7 @@ $ make build
 # run service
 $ make run
 
+# the service is now running on http://localhost:3000
 ```
 
 ### Postman Tests

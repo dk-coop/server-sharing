@@ -1,4 +1,4 @@
-version: '3.8'
+version: '2.1'
 services:
   mongodb:
     image : mongo
@@ -17,5 +17,5 @@ services:
     ports:
      - "3000:3000"
     volumes:
-     - ./:/usr/src
+     - ./:/usr/src/app
      - ./assets:/images:rw
